@@ -1,8 +1,7 @@
 pipeline:
-  max_statement_iterations: 9
-  max_proof_iterations: 3
+  max_statement_iterations: 5
+  max_proof_iterations: 5
   statement_check_interval: 1
-
 claude:
   cli_path: "claude"
   permission_mode: "bypassPermissions"
