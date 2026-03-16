@@ -3,13 +3,16 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Initialize conda for non-interactive shells (conda functions aren't loaded by default in scripts)
+# Initialize conda for non-interactive shells.
+# Temporarily disable nounset — conda's scripts reference unbound variables.
+set +u
 eval "$(conda shell.bash hook 2>/dev/null)" || {
     echo "ERROR: conda not found. Please install conda and ensure it is on your PATH."
     exit 1
 }
+set -u
 
-PYTHON="$(conda run -n agent which python)"
+PYTHON="$(conda run --no-banner -n agent which python)"
 
 PDF_PATH="${1:?Usage: bash run_pdf_to_latex.sh <input.pdf>}"
 OUTPUT_DIR="$SCRIPT_DIR/extracted_latex"
