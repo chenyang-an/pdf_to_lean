@@ -1,4 +1,4 @@
-# Formalization Upgrade Pipeline
+# Pdf_to_Lean Pipeline
 
 Converts mathematics textbooks and papers (PDF or LaTeX) into verified Lean 4
 formalizations using Claude agents orchestrated through the Microsoft Agent Framework.
