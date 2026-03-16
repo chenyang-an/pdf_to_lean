@@ -12,7 +12,7 @@ eval "$(conda shell.bash hook 2>/dev/null)" || {
 }
 set -u
 
-PYTHON="$(conda run --no-banner -n agent which python)"
+PYTHON="$(conda run -n agent which python)"
 
 PDF_PATH="${1:?Usage: bash run_pdf_to_latex.sh <input.pdf>}"
 OUTPUT_DIR="$SCRIPT_DIR/extracted_latex"

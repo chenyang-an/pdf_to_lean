@@ -12,7 +12,7 @@ eval "$(conda shell.bash hook 2>/dev/null)" || {
 }
 set -u
 
-PYTHON="$(conda run --no-banner -n agent which python)"
+PYTHON="$(conda run -n agent which python)"
 CONFIG="$SCRIPT_DIR/config.yaml"
 
 DEFAULT_INPUT="$SCRIPT_DIR/extracted_latex"

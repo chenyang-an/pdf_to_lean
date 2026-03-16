@@ -12,7 +12,7 @@ eval "$(conda shell.bash hook 2>/dev/null)" || {
 }
 set -u
 
-PYTHON="$(conda run --no-banner -n agent which python)"
+PYTHON="$(conda run -n agent which python)"
 
 PDF_PATH="${1:?Usage: bash run.sh <input.pdf>}"
 EXTRACTED_LATEX_DIR="$SCRIPT_DIR/extracted_latex"
@@ -28,7 +28,7 @@ echo "  Lean output:      $OUTPUT_DIR"
 echo ""
 
 # Check if extracted_latex already has ch*.txt files
-EXISTING_FILES=$(find "$EXTRACTED_LATEX_DIR" -maxdepth 1 -name 'ch*.txt' 2>/dev/null | head -1)
+EXISTING_FILES=$(find "$EXTRACTED_LATEX_DIR" -maxdepth 1 -name 'ch*.txt' 2>/dev/null | head -1 || true)
 if [ -n "$EXISTING_FILES" ]; then
     echo "============================================================"
     echo "  SKIPPING Steps 1-2: extracted_latex/ is non-empty"
