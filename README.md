@@ -1,7 +1,11 @@
 # Formalization Upgrade Pipeline
 
-Converts mathematics textbooks (PDF or LaTeX) into verified Lean 4 formalizations
-using Claude agents orchestrated through the Microsoft Agent Framework.
+Converts mathematics textbooks and papers (PDF or LaTeX) into verified Lean 4
+formalizations using Claude agents orchestrated through the Microsoft Agent Framework.
+
+The input must be a **PDF file** containing mathematical content (definitions,
+theorems, lemmas, corollaries, and proofs). The pipeline extracts these into LaTeX,
+then formalizes them into Lean 4.
 
 ## Installation
 
@@ -42,24 +46,43 @@ pipeline:
   statement_check_interval: 1
 
 claude:
-  provider: "bedrock"          # "bedrock", "api_key", or "subscription"
+  cli_path: "claude"
   permission_mode: "bypassPermissions"
 
+  # Choose ONE provider: "subscription", "bedrock", or "api_key"
+  provider: "bedrock"
+
+  # --- Option 1: Claude subscription (Pro/Max) ---
+  # No API key needed. Model is a shorthand: "opus", "sonnet", "haiku"
+  # Claude Max required for "opus". Claude Pro supports "sonnet".
+  subscription:
+    model: "opus"
+
+  # --- Option 2: AWS Bedrock ---
   bedrock:
     model: "us.anthropic.claude-opus-4-6-v1[1m]"
     aws_profile: "default"
 
-  # Or use Anthropic API key:
-  # provider: "api_key"
-  # api_key:
-  #   model: "claude-opus-4-6-20250609"
-  #   key: "sk-ant-..."
-
-  # Or use Claude subscription (Pro/Max):
-  # provider: "subscription"
-  # subscription:
-  #   model: "opus"
+  # --- Option 3: Anthropic API key ---
+  api_key:
+    model: "claude-opus-4-6-20250609"
+    key: ""  # paste your Anthropic API key here
 ```
+
+> **WARNING — Unrestricted permissions.** The pipeline runs Claude agents with
+> `permission_mode: "bypassPermissions"`, which grants the agent **full shell
+> access** on the host machine without confirmation prompts. Agents can read, write,
+> and delete files, execute arbitrary commands, and make network requests. Run the
+> pipeline in a sandboxed environment (container, VM, or isolated user account) and
+> never on a machine with sensitive data or credentials.
+
+> **WARNING — Token costs.** Each chapter triggers multiple Claude Opus agent calls
+> across statement formalization, verification, proof search, and verdict loops. A
+> single chapter can consume **millions of tokens** over several rounds. A full
+> textbook run can cost **hundreds of dollars** in API credits. Monitor spending via
+> `TOKEN_USAGE.md` in the output directory, which updates after every agent call.
+> Consider running a single chapter first to estimate costs before processing an
+> entire book.
 
 ## Quick Start
 
@@ -519,6 +542,28 @@ lean_formalization_output/
 | `fl_statements_change_history.md` | Decisions made by the statement change check agent |
 | `AUTO_RUN_LOG.txt` | Full agent output log |
 | `token_usage.json` | Cumulative token usage per agent call |
+
+---
+
+## Log Files
+
+The pipeline writes logs to several locations:
+
+| Log | Location | Contents |
+|-----|----------|----------|
+| **Formalization agent logs** | `experiments/auto/ch*/verification_fl_statement/AUTO_RUN_LOG.txt` | Full streaming output from every statement formalization agent call |
+| **Proof agent logs** | `experiments/auto/ch*/verification/AUTO_RUN_LOG.txt` | Full streaming output from every proof search agent call |
+| **PDF conversion logs** | `pdf_to_latex/log/convert_<timestamp>.log` | Streaming output from the PDF-to-LaTeX agent |
+| **Pipeline status** | `experiments/auto/ch*/*/AUTO_RUN_STATUS.md` | Current phase, iteration, and RUNNING/FINISHED/STOPPED state |
+| **Status history** | `experiments/auto/ch*/*/AUTO_RUN_STATUS.md.history` | Timestamped progress entries across runs (including resumes) |
+| **Token usage** | `TOKEN_USAGE.md` / `token_usage.json` | Per-call and cumulative token counts, elapsed time, and model name |
+| **Final report** | `final_summary.md` | Build status, per-chapter sorry/axiom counts, coverage results |
+
+To tail a running formalization in real time:
+
+```bash
+tail -f lean_formalization_output/experiments/auto/ch1/verification/AUTO_RUN_LOG.txt
+```
 
 ---
 
